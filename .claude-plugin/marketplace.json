@@ -1,0 +1,15 @@
+{
+  "name": "pico-ai-bridge",
+  "description": "Unofficial MCP bridge that lets Claude use models running on your own Pico AI Server (formerly Pico AI Homelab). Not affiliated with or endorsed by Starling Protocol, the developer of Pico AI Server.",
+  "owner": {
+    "name": "Takuomi Kagaya"
+  },
+  "plugins": [
+    {
+      "name": "pico-ai-bridge",
+      "source": "./",
+      "description": "Unofficial MCP bridge that lets Claude use models running on your own Pico AI Server (formerly Pico AI Homelab). Not affiliated with or endorsed by Starling Protocol, the developer of Pico AI Server.",
+      "version": "0.1.0"
+    }
+  ]
+}

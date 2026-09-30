@@ -1,0 +1,19 @@
+{
+  "name": "pico-ai-bridge",
+  "version": "0.1.0",
+  "description": "Unofficial MCP bridge that lets Claude use models running on your own Pico AI Server (formerly Pico AI Homelab). Not affiliated with or endorsed by Starling Protocol, the developer of Pico AI Server.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Takuomi Kagaya",
+  "repository": "https://github.com/takuomi/pico-ai-bridge",
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true,
+  "scripts": {
+    "test": "node scripts/run-tests.mjs test",
+    "test:live": "node --test --test-concurrency=1 test/live.js",
+    "test:conformance": "node scripts/run-tests.mjs dev",
+    "check:size": "node scripts/check-size.js"
+  }
+}

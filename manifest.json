@@ -1,0 +1,117 @@
+{
+  "manifest_version": "0.3",
+  "name": "pico-ai-bridge",
+  "display_name": "Pico AI Bridge (Unofficial)",
+  "version": "0.1.0",
+  "description": "Unofficial MCP bridge that lets Claude use models running on your own Pico AI Server (formerly Pico AI Homelab). Not affiliated with or endorsed by Starling Protocol, the developer of Pico AI Server.",
+  "long_description": "Unofficial bridge with six MCP tools for server information, merged model listing, Responses, chat completions, Ollama chat, and sequential comparison.",
+  "author": {
+    "name": "Takuomi Kagaya",
+    "url": "https://github.com/takuomi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takuomi/pico-ai-bridge"
+  },
+  "homepage": "https://github.com/takuomi/pico-ai-bridge",
+  "support": "https://github.com/takuomi/pico-ai-bridge/issues",
+  "license": "MIT",
+  "keywords": [
+    "pico",
+    "local-llm",
+    "mlx",
+    "ollama",
+    "openai",
+    "apple-silicon",
+    "mcp"
+  ],
+  "privacy_policies": [
+    "https://github.com/takuomi/pico-ai-bridge/blob/main/PRIVACY.md"
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "PICO_BASE_URL": "${user_config.base_url}",
+        "PICO_API_KEY": "${user_config.api_key}",
+        "PICO_TIMEOUT_MS": "${user_config.timeout_ms}",
+        "PICO_MAX_CONCURRENT_REQUESTS": "${user_config.max_concurrent_requests}"
+      }
+    }
+  },
+  "user_config": {
+    "base_url": {
+      "type": "string",
+      "title": "Pico base URL",
+      "description": "URL of your Pico AI Server, including port, e.g. http://localhost:11434. Do not include credentials; use the API key setting.",
+      "required": true
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API key",
+      "description": "Optional Pico API key; sent as a Bearer token.",
+      "sensitive": true,
+      "default": "",
+      "required": false
+    },
+    "timeout_ms": {
+      "type": "number",
+      "min": 1,
+      "max": 2147483647,
+      "title": "Timeout (milliseconds)",
+      "description": "Caller timeout in milliseconds, from 1 through 2147483647; sent requests continue and hold their FIFO permit until Pico finishes.",
+      "default": 300000,
+      "required": false
+    },
+    "max_concurrent_requests": {
+      "type": "number",
+      "title": "Maximum concurrent requests",
+      "description": "FIFO limit on simultaneous Pico HTTP requests: a whole number from 1 through 9007199254740991; default is one.",
+      "default": 1,
+      "required": false,
+      "min": 1,
+      "max": 9007199254740991
+    }
+  },
+  "tools": [
+    {
+      "name": "pico_server_info",
+      "description": "Read /api/version; raw mode returns HTTP status and parsed body."
+    },
+    {
+      "name": "pico_list_models",
+      "description": "Merge /v1/models and /api/tags; optionally inspect each merged model with /api/show."
+    },
+    {
+      "name": "pico_responses",
+      "description": "Generate through /v1/responses with string or item-array input."
+    },
+    {
+      "name": "pico_chat_completions",
+      "description": "Generate through /v1/chat/completions with prompt or messages."
+    },
+    {
+      "name": "pico_ollama_chat",
+      "description": "Generate through /api/chat with prompt or messages."
+    },
+    {
+      "name": "pico_compare_models",
+      "description": "Compare at least two models sequentially through a selected API."
+    }
+  ]
+}

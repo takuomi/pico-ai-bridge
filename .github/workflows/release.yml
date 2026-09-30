@@ -1,0 +1,55 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  archive-smoke:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+      - run: npm test
+      - run: npm ci --prefix dev
+      - run: npm run test:conformance
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack . "pico-ai-bridge-${GITHUB_REF_NAME#v}.mcpb"
+      - run: ${{ matrix.os == 'windows-latest' && 'python' || 'python3' }} scripts/package-artifacts.py "${GITHUB_REF_NAME#v}"
+      - run: ${{ matrix.os == 'windows-latest' && 'python' || 'python3' }} scripts/smoke-artifacts.py "${GITHUB_REF_NAME#v}"
+  release:
+    needs: archive-smoke
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+      - name: Match versions
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const v=process.env.GITHUB_REF_NAME.slice(1); for (const f of ['package.json','.claude-plugin/plugin.json','manifest.json']) if (JSON.parse(fs.readFileSync(f)).version!==v) throw Error(f+' version differs from '+v); if (JSON.parse(fs.readFileSync('.claude-plugin/marketplace.json')).plugins[0].version!==v) throw Error('marketplace version differs from '+v);"
+      - run: npm test
+      - run: npm ci --prefix dev
+      - run: npm run test:conformance
+      - run: npm run check:size
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate manifest.json
+      - run: npx --yes @anthropic-ai/claude-code@2.1.283 plugin validate --strict .
+      - name: Pack MCPB
+        run: npx --yes @anthropic-ai/mcpb@2.1.2 pack . "pico-ai-bridge-${GITHUB_REF_NAME#v}.mcpb"
+      - name: Pack plugin zip and inspect archives
+        run: python3 scripts/package-artifacts.py "${GITHUB_REF_NAME#v}"
+      - name: Verify extracted archives against mock Pico
+        run: python3 scripts/smoke-artifacts.py "${GITHUB_REF_NAME#v}"
+      - name: Publish artifacts
+        run: gh release create "$GITHUB_REF_NAME" "pico-ai-bridge-${GITHUB_REF_NAME#v}.mcpb" "pico-ai-bridge-${GITHUB_REF_NAME#v}-plugin.zip" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

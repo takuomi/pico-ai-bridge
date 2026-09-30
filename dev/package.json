@@ -1,0 +1,11 @@
+{
+  "name": "pico-ai-bridge-dev",
+  "private": true,
+  "type": "module",
+  "main": "./conformance.test.js",
+  "devDependencies": {
+    "@modelcontextprotocol/server": "2.1.0",
+    "@modelcontextprotocol/client": "2.1.0",
+    "zod": "4.6.5"
+  }
+}

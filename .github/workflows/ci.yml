@@ -1,0 +1,57 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - run: npm run check:size
+  conformance-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+      - run: npm ci --prefix dev
+      - run: npm run test:conformance
+      - run: npm run check:size
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate manifest.json
+      - run: npx --yes @anthropic-ai/claude-code@2.1.283 plugin validate --strict .
+      - name: Pack and inspect archives
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          npx --yes @anthropic-ai/mcpb@2.1.2 pack . "pico-ai-bridge-${VERSION}.mcpb"
+          python3 scripts/package-artifacts.py "$VERSION"
+      - name: Verify extracted archives against mock Pico
+        run: python3 scripts/smoke-artifacts.py "$(node -p "require('./package.json').version")"
+  archive-smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+      - run: npm test
+      - run: npm ci --prefix dev
+      - run: npm run test:conformance
+      - name: Pack and verify extracted archives against mock Pico
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          npx --yes @anthropic-ai/mcpb@2.1.2 pack . "pico-ai-bridge-${VERSION}.mcpb"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then PYTHON=python; else PYTHON=python3; fi
+          "$PYTHON" scripts/package-artifacts.py "$VERSION"
+          "$PYTHON" scripts/smoke-artifacts.py "$VERSION"

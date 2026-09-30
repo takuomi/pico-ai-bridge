@@ -1,0 +1,13 @@
+dev/
+test/
+.github/
+.claude-plugin/
+skills/
+scripts/
+*.md
+!README.md
+.gitignore
+.git/
+.claude/
+*.zip
+*.mcpb

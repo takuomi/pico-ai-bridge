@@ -1,0 +1,425 @@
+[
+  {
+    "name": "pico_server_info",
+    "title": "Pico server information",
+    "description": "Read /api/version for connectivity, name, version, build and bundle_identifier; raw mode returns HTTP status and parsed body.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "Pico server information",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": true
+    }
+  },
+  {
+    "name": "pico_list_models",
+    "title": "List Pico models",
+    "description": "Merge /v1/models and /api/tags by model name, treating names without a tag as :latest; optionally call /api/show once per model. Raw mode returns endpoint status and body pairs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        },
+        "include_capabilities": {
+          "type": "boolean",
+          "default": false,
+          "description": "Call /api/show once per merged model and add its capabilities and context_length."
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "List Pico models",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": true
+    }
+  },
+  {
+    "name": "pico_responses",
+    "title": "Pico Responses API",
+    "description": "Responses API: send optional string or item-array input, instructions, JSON schema and tool definitions as given. An absent `input` is omitted from the request. Default mode returns output and function and custom calls; raw returns Pico HTTP status and parsed body.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        },
+        "split_thinking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Move <think> blocks into reasoning in default mode."
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional top-level Pico request fields. Keys already sent by other arguments are rejected."
+        },
+        "model": {
+          "type": "string",
+          "description": "Model name; if omitted, Pico chooses its default model."
+        },
+        "input": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "items": {
+            "type": "object"
+          },
+          "description": "Optional Responses input string or item array sent as given; omitted when absent."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Instructions sent in the Responses request."
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An entry starting with data:, http://, or https:// (ASCII case-insensitive, no leading whitespace) is a URI; anything else is a local file path. `~` and paths starting with `~/` resolve against the bridge process home directory; other paths are used as given (relative paths resolve against its working directory). Local files are read without image checks; URLs are not fetched."
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "top_p": {
+          "type": "number"
+        },
+        "max_output_tokens": {
+          "type": "integer",
+          "description": "Maximum number of output tokens."
+        },
+        "reasoning_effort": {
+          "type": "string",
+          "description": "Sent as reasoning.effort."
+        },
+        "json_schema": {
+          "type": "object",
+          "description": "Sent as text.format with type json_schema and this schema."
+        },
+        "json_schema_name": {
+          "type": "string",
+          "description": "Name sent as text.format.name; required with json_schema by the Responses API."
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Tool definitions in the Responses API format."
+        },
+        "tool_choice": {
+          "type": [
+            "string",
+            "object"
+          ],
+          "description": "Tool choice sent as given."
+        },
+        "previous_response_id": {
+          "type": "string",
+          "description": "Prior response ID sent as given."
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "Pico Responses API",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": false
+    }
+  },
+  {
+    "name": "pico_chat_completions",
+    "title": "Pico chat completions",
+    "description": "Chat completions: send prompt, messages, images or system, plus optional response_format and tools. Default mode extracts the first choice; raw returns Pico HTTP status and parsed body.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        },
+        "split_thinking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Move <think> blocks into reasoning in default mode."
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional top-level Pico request fields. Keys already sent by other arguments are rejected."
+        },
+        "model": {
+          "type": "string",
+          "description": "Model name; if omitted, Pico chooses its default model."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "User prompt converted to a chat message."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Chat message objects sent as given."
+        },
+        "system": {
+          "type": "string",
+          "description": "System instruction added as a system message."
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An entry starting with data:, http://, or https:// (ASCII case-insensitive, no leading whitespace) is a URI; anything else is a local file path. `~` and paths starting with `~/` resolve against the bridge process home directory; other paths are used as given (relative paths resolve against its working directory). Local files are read without image checks; URLs are not fetched."
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "top_p": {
+          "type": "number"
+        },
+        "frequency_penalty": {
+          "type": "number"
+        },
+        "max_tokens": {
+          "type": "integer",
+          "description": "Maximum number of completion tokens."
+        },
+        "reasoning_effort": {
+          "type": "string",
+          "description": "Sent as reasoning_effort."
+        },
+        "response_format": {
+          "type": "object",
+          "description": "Response format object sent as given."
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Tool definitions in the chat completions API format."
+        },
+        "tool_choice": {
+          "type": [
+            "string",
+            "object"
+          ],
+          "description": "Tool choice sent as given."
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "Pico chat completions",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": false
+    }
+  },
+  {
+    "name": "pico_ollama_chat",
+    "title": "Pico Ollama chat",
+    "description": "Ollama chat: send optional prompt, messages, images or system, plus format, options and keep_alive. Absent `messages` are omitted from the request. Default mode extracts the message; raw returns Pico HTTP status and parsed body.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        },
+        "split_thinking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Move <think> blocks into reasoning in default mode."
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional top-level Pico request fields. Keys already sent by other arguments are rejected."
+        },
+        "model": {
+          "type": "string",
+          "description": "Model name; if omitted, Pico chooses its default model."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "User prompt converted to an Ollama chat message."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Ollama message objects sent as given; an empty array is allowed."
+        },
+        "system": {
+          "type": "string",
+          "description": "System instruction added as a system message."
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An entry starting with data:, http://, or https:// (ASCII case-insensitive, no leading whitespace) is a URI; anything else is a local file path. `~` and paths starting with `~/` resolve against the bridge process home directory; other paths are used as given (relative paths resolve against its working directory). Local files are read without image checks; URLs are not fetched."
+        },
+        "think": {
+          "type": "boolean",
+          "description": "Ollama think boolean. extra.think sends a level string or null unchanged; the tested Pico server accepted null and rejected level strings."
+        },
+        "format": {
+          "type": [
+            "string",
+            "object"
+          ],
+          "description": "Ollama format string or JSON schema object, sent as given; Ollama documents \"json\" as the string value, and the tested Pico server accepted \"json\" and rejected schema objects."
+        },
+        "options": {
+          "type": "object",
+          "description": "Ollama options object sent as given."
+        },
+        "keep_alive": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "description": "Keep the model loaded for this duration or number of seconds."
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Tool definitions in the Ollama API format."
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "Pico Ollama chat",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": false
+    }
+  },
+  {
+    "name": "pico_compare_models",
+    "title": "Compare Pico models",
+    "description": "Compare two or more models sequentially through the selected API. Provide prompt, messages, or images alone; with the Responses API, messages are sent as input. Each row includes elapsed_ms and either extracted output, Pico HTTP status and parsed body in raw mode, or an error.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return the HTTP status and parsed Pico body (text when not JSON), with the configured API key redacted in body values and keys."
+        },
+        "split_thinking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Move <think> blocks into reasoning in default mode."
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional top-level Pico request fields. Keys already sent by other arguments are rejected."
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "description": "Two or more model names to run sequentially."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "User prompt converted to the selected API message or input."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Message objects for the selected API; Responses sends them as input."
+        },
+        "system": {
+          "type": "string",
+          "description": "System message, or Responses instructions."
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An entry starting with data:, http://, or https:// (ASCII case-insensitive, no leading whitespace) is a URI; anything else is a local file path. `~` and paths starting with `~/` resolve against the bridge process home directory; other paths are used as given (relative paths resolve against its working directory). Local files are read without image checks; URLs are not fetched."
+        },
+        "api": {
+          "type": "string",
+          "enum": [
+            "responses",
+            "chat_completions",
+            "ollama"
+          ],
+          "default": "chat_completions",
+          "description": "API used for every model comparison."
+        },
+        "max_tokens": {
+          "type": "integer",
+          "description": "Maximum tokens; maps to max_output_tokens for Responses, num_predict in Ollama options, or max_tokens for chat completions."
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature; maps to Ollama options.temperature or the top-level temperature for Responses and chat completions."
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "Reasoning effort for Responses or chat_completions; unavailable with Ollama."
+        },
+        "think": {
+          "type": "boolean",
+          "description": "Ollama think boolean; available only with Ollama. extra.think sends a level string or null unchanged; the tested Pico server accepted null and rejected level strings."
+        },
+        "options": {
+          "type": "object",
+          "description": "Ollama options object; available only with Ollama."
+        }
+      },
+      "required": [
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "title": "Compare Pico models",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "idempotentHint": false
+    }
+  }
+]
